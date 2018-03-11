@@ -17,12 +17,22 @@ namespace Server
                 .WithNotParsed((errors) => Environment.Exit(0));
 
             var server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            server.Bind(new IPEndPoint(IPAddress.Any, NtpPortNumber));
 
-            EndPoint client = new IPEndPoint(IPAddress.Any, 0);
-            Replay.UtcReplay(server, client, secondsOffset);
+            try
+            {
+                server.Bind(new IPEndPoint(IPAddress.Any, NtpPortNumber));
 
-            server.Close();
+                EndPoint client = new IPEndPoint(IPAddress.Any, 0);
+                Replay.UtcReplay(server, client, secondsOffset);
+            }
+            catch (SntpLib.IncorrectPackageFormatException exception)
+            {
+                Console.WriteLine(exception.Message);
+            }
+            finally
+            {
+                server.Close();
+            }
         }
     }
 }

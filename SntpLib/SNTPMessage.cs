@@ -62,16 +62,27 @@ namespace SntpLib
 
         public SNTPMessage(byte[] buffer) : this()
         {
-            int modeStartBit = LeapIndicator.Length + VersionNumber.Length;
-            string firstByte = Convert.ToString(buffer[0], 2).PadLeft(8, '0');
-            Mode = (ModeType)firstByte.Substring(modeStartBit);
-            UpdateFirstByte();
+            try
+            {
+                int modeStartBit = LeapIndicator.Length + VersionNumber.Length;
+                string firstByte = Convert.ToString(buffer[0], 2).PadLeft(8, '0');
+                Mode = (ModeType)firstByte.Substring(modeStartBit);
+                UpdateFirstByte();
 
-            foreach (var field in fields)
-                buffer.Skip(field.PackageStartByte)
-                      .Take(field.ByteArray.Length)
-                      .ToArray()
-                      .CopyTo(field.ByteArray, 0);
+                foreach (var field in fields)
+                    buffer.Skip(field.PackageStartByte)
+                          .Take(field.ByteArray.Length)
+                          .ToArray()
+                          .CopyTo(field.ByteArray, 0);
+            }
+            catch (Exception exception) when (
+                exception is InvalidCastException || 
+                exception is ArrayTypeMismatchException ||
+                exception is ArgumentOutOfRangeException ||
+                exception is ArgumentException)
+            {
+                throw new IncorrectPackageFormatException();
+            }
         }
 
         public static byte[] ConvertDateTimeToBytes(DateTime dateTime)

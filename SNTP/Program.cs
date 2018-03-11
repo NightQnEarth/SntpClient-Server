@@ -15,8 +15,19 @@ namespace Client
         {
             Thread.Sleep(500);
             var client = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            Console.WriteLine(Request.UtcRequest(client, ServerAddress));
-            client.Close();
+
+            try
+            {
+                Console.WriteLine(Request.UtcRequest(client, ServerAddress));
+            }
+            catch (SntpLib.IncorrectPackageFormatException exception)
+            {
+                Console.WriteLine(exception.Message);
+            }
+            finally
+            {
+                client.Close();
+            }
         }
     }
 }
