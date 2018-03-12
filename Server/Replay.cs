@@ -6,10 +6,10 @@ namespace Server
 {
     class Replay
     {
-        public static void UtcReplay(Socket server, EndPoint remoteAddress, int secondsOffset)
+        public static void UtcReplay(Socket server, EndPoint remoteAddress, int secondsOffset, int receiveTimeout)
         {
-            server.ReceiveTimeout = 1000 * 60 * 5;
-            server.SendTimeout = 1000 * 3;
+            server.ReceiveTimeout = receiveTimeout;
+            server.SendTimeout = 1000 * 5;
 
             var clientRequest = new byte[SntpLib.SNTPMessage.PackageBytesCount];
             var bytesReceived = server.ReceiveFrom(clientRequest, ref remoteAddress);

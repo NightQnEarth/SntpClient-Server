@@ -12,22 +12,36 @@ namespace Server
         static void Main(string[] args)
         {
             var secondsOffset = 0;
+            var receiveTimeout = 0;
             Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(opts => secondsOffset = opts.SecondsOffset)
+                .WithParsed(opts => 
+                {
+                    secondsOffset = opts.SecondsOffset;
+                    receiveTimeout = opts.ReceiveTimeout;
+                })
                 .WithNotParsed((errors) => Environment.Exit(0));
 
             var server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            server.Bind(new IPEndPoint(IPAddress.Any, NtpPortNumber));
 
             try
             {
-                server.Bind(new IPEndPoint(IPAddress.Any, NtpPortNumber));
-
-                EndPoint client = new IPEndPoint(IPAddress.Any, 0);
-                Replay.UtcReplay(server, client, secondsOffset);
+                while (true)
+                {
+                    EndPoint remoteAddress = new IPEndPoint(IPAddress.Any, 0);
+                    Replay.UtcReplay(server, remoteAddress, secondsOffset, receiveTimeout);
+                }
             }
             catch (SntpLib.IncorrectPackageFormatException exception)
             {
                 Console.WriteLine(exception.Message);
+            }
+            catch (SocketException exception)
+            {
+                if (exception.SocketErrorCode == SocketError.TimedOut)
+                    Console.WriteLine("Time is out.");
+                else
+                    throw;
             }
             finally
             {
