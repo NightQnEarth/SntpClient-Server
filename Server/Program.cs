@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Net;
 using CommandLine;
+using System.Security;
 
 namespace Server
 {
@@ -13,6 +14,7 @@ namespace Server
         {
             var secondsOffset = 0;
             var receiveTimeout = 0;
+
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(opts => 
                 {
@@ -22,7 +24,17 @@ namespace Server
                 .WithNotParsed((errors) => Environment.Exit(0));
 
             var server = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            server.Bind(new IPEndPoint(IPAddress.Any, NtpPortNumber));
+
+            try
+            {
+                server.Bind(new IPEndPoint(IPAddress.Any, NtpPortNumber));
+            }
+            catch (Exception ex) when (ex is SocketException || ex is SecurityException)
+            {
+                Console.WriteLine("Problem with access to 123 port.");
+                server.Close();
+                Environment.Exit(0);
+            }
 
             try
             {
@@ -36,12 +48,10 @@ namespace Server
             {
                 Console.WriteLine(exception.Message);
             }
-            catch (SocketException exception)
+            catch (SocketException exception) when 
+                (exception.SocketErrorCode == SocketError.TimedOut)
             {
-                if (exception.SocketErrorCode == SocketError.TimedOut)
-                    Console.WriteLine("Time is out.");
-                else
-                    throw;
+                Console.WriteLine("Time is out.");
             }
             finally
             {
