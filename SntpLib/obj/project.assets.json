@@ -185,11 +185,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\Desktop\\SntpClient-Server\\SntpLib\\SntpLib.csproj",
+      "projectUniqueName": "C:\\Users\\User\\Desktop\\Languages\\C#\\SntpClient-Server\\SntpLib\\SntpLib.csproj",
       "projectName": "SntpLib",
-      "projectPath": "C:\\Users\\User\\Desktop\\SntpClient-Server\\SntpLib\\SntpLib.csproj",
+      "projectPath": "C:\\Users\\User\\Desktop\\Languages\\C#\\SntpClient-Server\\SntpLib\\SntpLib.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\User\\Desktop\\SntpClient-Server\\SntpLib\\obj\\",
+      "outputPath": "C:\\Users\\User\\Desktop\\Languages\\C#\\SntpClient-Server\\SntpLib\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
