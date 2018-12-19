@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{70CB13AE-5171-4194-AB3F-62EA764084CE}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SNTP</RootNamespace>
-    <AssemblyName>SNTP</AssemblyName>
+    <RootNamespace>Client</RootNamespace>
+    <AssemblyName>Client</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
