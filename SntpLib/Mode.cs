@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 namespace SntpLib
 {
     public class ModeType
@@ -10,10 +9,7 @@ namespace SntpLib
         public static readonly ModeType ClientMode = new ModeType("011");
         public static readonly ModeType ServerMode = new ModeType("100");
 
-        private ModeType(string bits)
-        {
-            this.bits = bits;
-        }
+        private ModeType(string bits) => this.bits = bits;
 
         public static explicit operator ModeType(string bits)
         {
@@ -22,9 +18,6 @@ namespace SntpLib
             throw new ArgumentException();
         }
 
-        public override string ToString()
-        {
-            return bits;
-        }
+        public override string ToString() => bits;
     }
 }

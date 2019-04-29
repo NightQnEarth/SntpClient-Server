@@ -1,33 +1,29 @@
 ﻿using System;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
-
+using SntpLib;
 
 namespace Client
 {
-    public class Program
+    public static class Program
     {
         //private static readonly DnsEndPoint ServerAddress = new DnsEndPoint("time.windows.com", 123);
-        private static readonly IPEndPoint ServerAddress = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 123);
+        private static readonly IPEndPoint serverAddress = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 123);
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             Thread.Sleep(500);
-            var client = new Socket(SocketType.Dgram, ProtocolType.Udp);
 
-            try
-            {
-                Console.WriteLine(Request.UtcRequest(client, ServerAddress));
-            }
-            catch (SntpLib.IncorrectPackageFormatException exception)
-            {
-                Console.WriteLine(exception.Message);
-            }
-            finally
-            {
-                client.Close();
-            }
+            using (var client = new Socket(SocketType.Dgram, ProtocolType.Udp))
+                try
+                {
+                    Console.WriteLine(Request.UtcRequest(client, serverAddress));
+                }
+                catch (IncorrectPackageFormatException exception)
+                {
+                    Console.WriteLine(exception.Message);
+                }
         }
     }
 }

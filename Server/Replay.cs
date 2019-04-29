@@ -1,30 +1,32 @@
 ﻿using System;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
+using SntpLib;
 
 namespace Server
 {
-    class Replay
+    static class Replay
     {
+        private const int SendTimeout = 1000 * 5;
+
         public static void UtcReplay(Socket server, EndPoint remoteAddress, int secondsOffset, int receiveTimeout)
         {
             server.ReceiveTimeout = receiveTimeout;
-            server.SendTimeout = 1000 * 5;
+            server.SendTimeout = SendTimeout;
 
-            var clientRequest = new byte[SntpLib.SNTPMessage.PackageBytesCount];
-            var bytesReceived = server.ReceiveFrom(clientRequest, ref remoteAddress);
+            var clientRequest = new byte[SNTPMessage.PackageBytesCount];
+            server.ReceiveFrom(clientRequest, ref remoteAddress);
 
             var destinationTimestamp = DateTime.UtcNow;
 
-            var serverReplay = new SntpLib.SNTPMessage(clientRequest)
+            var serverReplay = new SNTPMessage(clientRequest)
             {
-                Mode = SntpLib.ModeType.ServerMode
+                Mode = ModeType.ServerMode
             };
-            serverReplay.ReceiveTimestamp.ByteArray =
-                SntpLib.SNTPMessage.ConvertDateTimeToBytes(destinationTimestamp);
-            serverReplay.TransmitTimestamp.ByteArray =
-                SntpLib.SNTPMessage.ConvertDateTimeToBytes(DateTime.UtcNow.AddSeconds(secondsOffset));
 
+            serverReplay.ReceiveTimestamp.ByteArray = SNTPMessage.ConvertDateTimeToBytes(destinationTimestamp);
+            serverReplay.TransmitTimestamp.ByteArray = SNTPMessage.ConvertDateTimeToBytes(
+                DateTime.UtcNow.AddSeconds(secondsOffset));
             server.SendTo(serverReplay.ResultMessage, remoteAddress);
         }
     }

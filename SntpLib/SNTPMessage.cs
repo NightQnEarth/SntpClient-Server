@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
-
 
 namespace SntpLib
 {
@@ -17,7 +17,7 @@ namespace SntpLib
         public readonly PackageField Precision = new PackageField(3, new byte[1]);
         public readonly PackageField RootDelay = new PackageField(4, new byte[4]);
         public readonly PackageField RootDispersion = new PackageField(8, new byte[4]);
-        public readonly PackageField ReferenceID = new PackageField(12, new byte[4]);
+        public readonly PackageField ReferenceId = new PackageField(12, new byte[4]);
         public readonly PackageField ReferenceTimestamp = new PackageField(16, new byte[8]);
         public readonly PackageField OriginTimestamp = new PackageField(24, new byte[8]);
         public readonly PackageField ReceiveTimestamp = new PackageField(32, new byte[8]);
@@ -27,11 +27,12 @@ namespace SntpLib
 
         private void UpdateFirstByte()
         {
-            string firstByte = String.Join("", new[] { LeapIndicator, VersionNumber, Mode.ToString() });
+            string firstByte = string.Join("", LeapIndicator, VersionNumber, Mode.ToString());
             resultMessage[0] = Convert.ToByte(firstByte, 2);
         }
 
         private byte[] resultMessage;
+
         public byte[] ResultMessage
         {
             get
@@ -47,9 +48,12 @@ namespace SntpLib
         private SNTPMessage()
         {
             ResultMessage = new byte[PackageBytesCount];
-            fields = new PackageField[] { Stratum, Poll, Precision, RootDelay,
-                                          RootDispersion, ReferenceID, ReferenceTimestamp,
-                                          OriginTimestamp, ReceiveTimestamp,TransmitTimestamp };
+            fields = new[]
+            {
+                Stratum, Poll, Precision, RootDelay,
+                RootDispersion, ReferenceId, ReferenceTimestamp,
+                OriginTimestamp, ReceiveTimestamp, TransmitTimestamp
+            };
         }
 
         public SNTPMessage(ModeType modeType) : this()
@@ -75,13 +79,12 @@ namespace SntpLib
                           .ToArray()
                           .CopyTo(field.ByteArray, 0);
             }
-            catch (Exception exception) when (
-                exception is InvalidCastException || 
-                exception is ArrayTypeMismatchException ||
-                exception is ArgumentOutOfRangeException ||
-                exception is ArgumentException)
+            catch (Exception exception) when (exception is InvalidCastException ||
+                                              exception is ArrayTypeMismatchException ||
+                                              exception is ArgumentOutOfRangeException ||
+                                              exception is ArgumentException)
             {
-                throw new IncorrectPackageFormatException();
+                throw new IncorrectPackageFormatException(exception.Message, exception.InnerException);
             }
         }
 
@@ -89,9 +92,10 @@ namespace SntpLib
         {
             double destinationSeconds = (dateTime - Era0).TotalSeconds;
 
-            var intPart = Convert.ToUInt32((destinationSeconds.ToString().Split('.')[0]));
-            var floatPart = (long)((destinationSeconds - intPart) * 
-                            (long)Math.Pow(10, ((destinationSeconds - intPart).ToString().Length - 2)));
+            var intPart = Convert.ToUInt32(destinationSeconds.ToString(CultureInfo.InvariantCulture).Split('.')[0]);
+            var floatPart = (long)((destinationSeconds - intPart) *
+                                   (long)Math.Pow(10, (destinationSeconds - intPart)
+                                                      .ToString(CultureInfo.InvariantCulture).Length - 2));
             var intStr = Convert.ToString(intPart, 2).PadLeft(32, '0');
             var floatStr = Convert.ToString(floatPart, 2).PadLeft(32, '0');
 
@@ -101,6 +105,7 @@ namespace SntpLib
                 timeBytes[j] = Convert.ToByte(intStr.Substring(8 * j, 8), 2);
                 timeBytes[j + timeBytes.Length / 2] = Convert.ToByte(floatStr.Substring(8 * j, 8), 2);
             }
+
             return timeBytes;
         }
     }
